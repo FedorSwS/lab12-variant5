@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://hotel_user:hotel_pass@db:5432/hotel_booking
+      - PYTHONPATH=/app
+    volumes:
+      - ./app:/app/app
+      - ./uploads:/app/uploads
+    depends_on:
+      - db
+    networks:
+      - hotel_network
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=hotel_user
+      - POSTGRES_PASSWORD=hotel_pass
+      - POSTGRES_DB=hotel_booking
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - hotel_network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@hotel.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    networks:
+      - hotel_network
+
+volumes:
+  postgres_data:
+
+networks:
+  hotel_network:
+    driver: bridge
